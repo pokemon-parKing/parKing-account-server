@@ -1,0 +1,35 @@
+{
+  "name": "parking-account-server",
+  "version": "1.0.0",
+  "description": "service for users an valet information",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pokemon-parKing/parKing-account-server.git"
+  },
+  "author": "Bruce Wong",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pokemon-parKing/parKing-account-server/issues"
+  },
+  "homepage": "https://github.com/pokemon-parKing/parKing-account-server#readme",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "@supabase/supabase-js": "^2.39.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.55.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "nodemon": "^3.0.2",
+    "prettier": "^3.1.0"
+  }
+}
