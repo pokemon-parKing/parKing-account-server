@@ -4,7 +4,8 @@
   "description": "service for users an valet information",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "login-server-dev": "nodemon -w account_server/index.js"
   },
   "repository": {
     "type": "git",
