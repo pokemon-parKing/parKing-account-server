@@ -1,11 +1,20 @@
-const router = require('express').Router();
+const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
+const router = express.Router();
 
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 const accountInfo = supabase.from('accounts');
 const authUsers = supabase.from('auth.users');
 
-app.get('/login', async (req, res) => {
+//this is just my test route setup from before so that I can test the server is running and I can query the database
+//these are the routes that i think i will need to set up.
+//need to set up a login get request to see if a google id token exists on the database,
+//need another request to log in a user with a google id token if it exists on the database
+//need to set up a post request to create a new driver account with the google id token and the user information that is input on the front end
+//need to set up a post request to create a new valet account with the google id token and the user information that is input on the front end (might combine these requests into one for more dry code)
+
+router.get('/login/test', async (req, res) => {
   try {
     const { data, error } = await accountInfo.select('*');
     //another valid way to query the data from this table would be to use the following:
@@ -26,3 +35,5 @@ app.get('/login', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+module.exports = router;

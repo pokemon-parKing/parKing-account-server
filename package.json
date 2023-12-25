@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon account_server/index.js",
-    "login-server-dev": "nodemon -w account_server/index.js"
+    "login-server-dev": "nodemon login_server/index.js"
   },
   "repository": {
     "type": "git",
@@ -18,9 +18,10 @@
   },
   "homepage": "https://github.com/pokemon-parKing/parKing-account-server#readme",
   "dependencies": {
+    "@supabase/supabase-js": "^2.39.1",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "@supabase/supabase-js": "^2.39.1"
+    "path": "^0.12.7"
   },
   "devDependencies": {
     "eslint": "^8.55.0",

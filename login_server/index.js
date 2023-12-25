@@ -1,13 +1,14 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const router = require('../login_routes/router');
-require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '/public/dist')));
+//POST MVP: implement a middleware function to access cookies saved in the browser to expidite login process
 app.use('/', router);
 
 app.listen(port, () => {
