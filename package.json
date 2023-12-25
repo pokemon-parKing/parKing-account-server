@@ -4,7 +4,7 @@
   "description": "service for users an valet information",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon account_server/index.js",
     "login-server-dev": "nodemon -w account_server/index.js"
   },
   "repository": {
