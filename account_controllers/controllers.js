@@ -120,26 +120,25 @@ module.exports = {
     getCurrentReservations: async (req, res) => {
       try {
         const { id } = req.params;
-        const { data: reservationsData, error: reservationsError } =
-          await supabase
-            .from('reservations')
-            .select(
-              `
+        const { data, error } = await supabase
+          .from('reservations')
+          .select(
+            `
             parking_spot_id,
             date,
             time,
             garages ( name, address, city, state, country, zip)
           `
-            )
-            .eq('user_id', id);
-        if (reservationsError) {
-          console.error('Error fetching reservations:', reservationsError);
+          )
+          .eq('user_id', id);
+        if (error) {
+          console.error('Error fetching reservations:', error);
           return res.status(500).json({ error: 'Internal Server Error' });
         }
-        if (!reservationsData || reservationsData.length === 0) {
+        if (!data || data.length === 0) {
           return res.status(404).json({ error: 'No reservations found' });
         }
-        res.status(200).json({ reservations: reservationsData });
+        res.status(200).json({ reservations: data });
       } catch (error) {
         console.error('Error fetching reservations:', error);
         res.status(500).json({ error: 'Internal Server Error' });
