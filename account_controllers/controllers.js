@@ -22,7 +22,7 @@ module.exports = {
           .single();
         if (error) {
           console.error('Error retrieving user data:', error);
-          return res.status(500).send('Internal Server Error');
+          return res.status(500);
         }
         if (!data) {
           return res.status(404).send('User not found');
@@ -51,7 +51,7 @@ module.exports = {
           .select();
         if (error) {
           console.error('Error updating user data:', error);
-          return res.status(500).send('Internal Server Error');
+          return res.status(500);
         }
         res.status(200).json(data);
       } catch (error) {
@@ -69,7 +69,7 @@ module.exports = {
           .eq('user_id', id);
         if (error) {
           console.error('Error retrieving car data:', error);
-          return res.status(500).send('Internal Server Error');
+          return res.status(500);
         }
         if (!data || data.length === 0) {
           return res.status(404).send('User not found or no cars associated');
@@ -85,19 +85,7 @@ module.exports = {
       try {
         const { id } = req.params;
         const { make, model, color, license_plate_number } = req.body;
-        const { data: userData, error: userError } = await supabase
-          .from('accounts')
-          .select('id')
-          .eq('id', id)
-          .single();
-        if (userError) {
-          console.error('Error checking user existence:', userError);
-          return res.status(500).send('Internal Server Error');
-        }
-        if (!userData) {
-          return res.status(404).send('User not found');
-        }
-        const { data, error } = await supabase.from('cars').insert([
+        const { error } = await supabase.from('cars').insert([
           {
             make,
             model,
@@ -108,7 +96,7 @@ module.exports = {
         ]);
         if (error) {
           console.error('Error adding vehicle:', error);
-          return res.status(500).send('Internal Server Error');
+          return res.status(500);
         }
         res.status(201).send('Successfully added vehicle');
       } catch (error) {
@@ -133,15 +121,15 @@ module.exports = {
           .eq('user_id', id);
         if (error) {
           console.error('Error fetching reservations:', error);
-          return res.status(500).json({ error: 'Internal Server Error' });
+          return res.status(500);
         }
         if (!data || data.length === 0) {
-          return res.status(404).json({ error: 'No reservations found' });
+          return res.status(404).send('No reservations found');
         }
-        res.status(200).json({ reservations: data });
+        res.status(200).json(data);
       } catch (error) {
         console.error('Error fetching reservations:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).send('Internal Server Error');
       }
     },
   },
@@ -156,17 +144,15 @@ module.exports = {
           .eq('user_id', id);
         if (error) {
           console.error('Error fetching valet data:', error);
-          return res.status(500).json({ error: 'Internal Server Error' });
+          return res.status(500);
         }
         if (!data || data.length === 0) {
-          return res
-            .status(404)
-            .json({ error: 'No garages found for the given user' });
+          return res.status(404).send('No garages found for the given user');
         }
-        res.status(200).json({ garages: data });
+        res.status(200).json(data);
       } catch (error) {
         console.error('Error fetching valet data:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).send('Internal Server Error');
       }
     },
 
@@ -174,21 +160,19 @@ module.exports = {
       try {
         const { id } = req.params;
         const { operation_hours } = req.body;
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('garages')
           .update({ operation_hours })
           .eq('user_id', id)
           .single();
         if (error) {
           console.error('Error updating operation hours:', error);
-          return res.status(500).json({ error: 'Internal Server Error' });
+          return res.status(500);
         }
-        res
-          .status(200)
-          .json({ message: 'Operation hours updated successfully' });
+        res.status(200).send('Operation hours updated successfully');
       } catch (error) {
         console.error('Error updating operation hours:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).send('Internal Server Error');
       }
     },
 
@@ -196,21 +180,19 @@ module.exports = {
       try {
         const { id } = req.params;
         const { spots } = req.body;
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('garages')
           .update({ spots })
           .eq('user_id', id)
           .single();
         if (error) {
           console.error('Error updating garage parking spots:', error);
-          return res.status(500).json({ error: 'Internal Server Error' });
+          return res.status(500);
         }
-        res
-          .status(200)
-          .json({ message: 'Garage parking spots updated successfully' });
+        res.status(200).send('Garage parking spots updated successfully');
       } catch (error) {
         console.error('Error updating garage parking spots:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).send('Internal Server Error');
       }
     },
   },
