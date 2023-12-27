@@ -180,16 +180,87 @@ module.exports = {
       try {
         const { id } = req.params;
         const { spots } = req.body;
-        const { error } = await supabase
+
+        const { error: garageError } = await supabase
           .from('garages')
           .update({ spots })
           .eq('user_id', id)
           .single();
-        if (error) {
-          console.error('Error updating garage parking spots:', error);
+
+        if (garageError) {
+          console.error('Error updating garage parking spots:', garageError);
           return res.sendStatus(500);
         }
-        res.status(200).send('Garage parking spots updated successfully');
+
+        const { data: garageData, error: garageDataError } = await supabase
+          .from('garages')
+          .select('id')
+          .eq('user_id', id)
+          .single();
+
+        if (garageDataError) {
+          console.error('Error retrieving garage data:', garageDataError);
+          return res.sendStatus(500);
+        }
+
+        const garageId = garageData.id;
+
+        const { data: existingSpots, error: existingSpotsError } =
+          await supabase
+            .from('parking_spots')
+            .select('id')
+            .eq('garage_id', garageId);
+
+        if (existingSpotsError) {
+          console.error(
+            'Error retrieving existing parking spots:',
+            existingSpotsError
+          );
+          return res.sendStatus(500);
+        }
+
+        const existingSpotIds = existingSpots.map((spot) => spot.id);
+
+        const numSpotsToAdd = spots - existingSpotIds.length;
+
+        if (numSpotsToAdd > 0) {
+          const newSpotIds = await Promise.all(
+            Array.from({ length: numSpotsToAdd }, async (_, index) => {
+              const { data: newSpot, error: newSpotError } = await supabase
+                .from('parking_spots')
+                .insert({
+                  garage_id: garageId,
+                })
+                .single();
+
+              if (newSpotError) {
+                console.error('Error adding new parking spot:', newSpotError);
+                return null;
+              }
+            })
+          );
+
+          const filteredNewSpotIds = newSpotIds.filter((id) => id !== null);
+          const allSpotIds = existingSpotIds.concat(filteredNewSpotIds);
+
+          res.status(200).json({ garageId, spotIds: allSpotIds });
+        } else if (numSpotsToAdd < 0) {
+          const spotsToRemove = existingSpotIds.slice(0, -numSpotsToAdd);
+
+          const { error: removeSpotsError } = await supabase
+            .from('parking_spots')
+            .delete()
+            .in('id', spotsToRemove);
+
+          if (removeSpotsError) {
+            console.error('Error removing parking spots:', removeSpotsError);
+            return res.sendStatus(500);
+          }
+
+          res.status(200).json({ garageId, removedSpotIds: spotsToRemove });
+        } else {
+          res.status(200).json({ garageId, spotIds: existingSpotIds });
+        }
       } catch (error) {
         console.error('Error updating garage parking spots:', error);
         res.status(500).send('Internal Server Error');

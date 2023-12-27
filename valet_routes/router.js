@@ -1,13 +1,13 @@
-const router = require('express').Router();
+const valetRouter = require('express').Router();
 const controllers = require('../account_controllers/controllers');
 require('dotenv').config();
 
-router.route('/valet/:id').get(controllers.valetInfo.getValetData);
-router
+valetRouter.route('/valet/:id').get(controllers.valetInfo.getValetData);
+valetRouter
   .route('/valet/:id/operation-hours')
   .put(controllers.valetInfo.editOperationHours);
-router
+valetRouter
   .route('/valet/:id/spots')
   .put(controllers.valetInfo.editGarageParkingSpots);
 
-module.exports = router;
+module.exports = valetRouter;

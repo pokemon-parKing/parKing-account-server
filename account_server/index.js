@@ -1,11 +1,13 @@
 const express = require('express');
 const router = require('../account_routes/router');
+const valetRouter = require('../valet_routes/router');
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
 app.use('/', router);
+app.use('/', valetRouter);
 
 app.listen(port, (err) => {
   if (err) {
