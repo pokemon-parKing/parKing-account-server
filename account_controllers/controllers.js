@@ -22,7 +22,7 @@ module.exports = {
           .single();
         if (error) {
           console.error('Error retrieving user data:', error);
-          return res.status(500);
+          return res.sendStatus(500);
         }
         if (!data) {
           return res.status(404).send('User not found');
@@ -51,7 +51,7 @@ module.exports = {
           .select();
         if (error) {
           console.error('Error updating user data:', error);
-          return res.status(500);
+          return res.sendStatus(500);
         }
         res.status(200).json(data);
       } catch (error) {
@@ -69,7 +69,7 @@ module.exports = {
           .eq('user_id', id);
         if (error) {
           console.error('Error retrieving car data:', error);
-          return res.status(500);
+          return res.sendStatus(500);
         }
         if (!data || data.length === 0) {
           return res.status(404).send('User not found or no cars associated');
@@ -96,7 +96,7 @@ module.exports = {
         ]);
         if (error) {
           console.error('Error adding vehicle:', error);
-          return res.status(500);
+          return res.sendStatus(500);
         }
         res.status(201).send('Successfully added vehicle');
       } catch (error) {
@@ -121,7 +121,7 @@ module.exports = {
           .eq('user_id', id);
         if (error) {
           console.error('Error fetching reservations:', error);
-          return res.status(500);
+          return res.sendStatus(500);
         }
         if (!data || data.length === 0) {
           return res.status(404).send('No reservations found');
@@ -144,7 +144,7 @@ module.exports = {
           .eq('user_id', id);
         if (error) {
           console.error('Error fetching valet data:', error);
-          return res.status(500);
+          return res.sendStatus(500);
         }
         if (!data || data.length === 0) {
           return res.status(404).send('No garages found for the given user');
@@ -167,7 +167,7 @@ module.exports = {
           .single();
         if (error) {
           console.error('Error updating operation hours:', error);
-          return res.status(500);
+          return res.sendStatus(500);
         }
         res.status(200).send('Operation hours updated successfully');
       } catch (error) {
@@ -187,7 +187,7 @@ module.exports = {
           .single();
         if (error) {
           console.error('Error updating garage parking spots:', error);
-          return res.status(500);
+          return res.sendStatus(500);
         }
         res.status(200).send('Garage parking spots updated successfully');
       } catch (error) {
