@@ -225,8 +225,8 @@ module.exports = {
 
         if (numSpotsToAdd > 0) {
           const newSpotIds = await Promise.all(
-            Array.from({ length: numSpotsToAdd }, async (_, index) => {
-              const { data: newSpot, error: newSpotError } = await supabase
+            Array.from({ length: numSpotsToAdd }, async () => {
+              const { error: newSpotError } = await supabase
                 .from('parking_spots')
                 .insert({
                   garage_id: garageId,
@@ -240,7 +240,9 @@ module.exports = {
             })
           );
 
-          const filteredNewSpotIds = newSpotIds.filter((id) => id !== null);
+          const filteredNewSpotIds = newSpotIds.filter(
+            (spotsId) => spotsId !== null
+          );
           const allSpotIds = existingSpotIds.concat(filteredNewSpotIds);
 
           res.status(200).json({ garageId, spotIds: allSpotIds });
