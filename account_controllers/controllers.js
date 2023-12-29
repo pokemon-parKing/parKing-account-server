@@ -47,7 +47,6 @@ module.exports = {
             phone_number,
           })
           .eq('id', id)
-          .single()
           .select();
         if (error) {
           console.error('Error updating user data:', error);
