@@ -81,6 +81,24 @@ module.exports = {
       }
     },
 
+    deleteVehicle: async (req, res) => {
+      try {
+        const { vehicleId } = req.body;
+        const { error } = await supabase
+          .from('cars')
+          .delete()
+          .eq('id', vehicleId);
+        if (error) {
+          console.error('Error deleting vehicle:', error);
+          return res.sendStatus(500);
+        }
+        res.status(200).send('Vehicle deleted successfully');
+      } catch (error) {
+        console.error('Error deleting vehicle:', error);
+        res.status(500).send('Internal Server Error');
+      }
+    },
+
     addVehicle: async (req, res) => {
       try {
         const { id } = req.params;
