@@ -263,12 +263,11 @@ module.exports = {
           .split('-')
           .map(Number);
 
-        const today = DateTime.local().startOf('day');
-        const next7Days = [...Array(7)].map((_, index) =>
-          today.plus({ days: index })
-        );
-        const formattedNext7Days = next7Days.map((day) =>
-          day.toFormat('MM-dd-yy')
+        const formattedNext7Days = [...Array(7)].map((_, index) =>
+          DateTime.local()
+            .startOf('day')
+            .plus({ days: index })
+            .toFormat('MM-dd-yy')
         );
 
         const {
