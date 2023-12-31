@@ -4,7 +4,7 @@ const path = require('path');
 const router = require('../login_routes/router');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.LOGIN_PORT || 3000;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '/public/dist')));

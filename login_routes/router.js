@@ -4,10 +4,7 @@ const router = express.Router();
 
 const geocodeMiddleware = require('../middleware/geocodeGrabber');
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-
-const accountInfo = supabase.from('accounts');
-const authUsers = supabase.from('auth.users');
+const supabase = createClient(process.env.Superbase_URL, process.env.Superbase_API_Key);
 
 //these are the routes that i will need to set up.
 //driver/valet account creation, get account info
@@ -148,7 +145,9 @@ router.post('/login/:id/valet', geocodeMiddleware, async (req, res) => {
 
 router.get('/login/test/test', async (req, res) => {
   try {
-    const { data, error } = await accountInfo.select('*');
+    const { data, error } = await supabase
+    .from('accounts')
+    .select('*');
     //another valid way to query the data from this table would be to use the following:
     // const { data, error } = await supabase.from('accounts').select('*');
 
