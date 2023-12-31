@@ -13,16 +13,13 @@ const authUsers = supabase.from('auth.users');
 //driver/valet account creation, get account info
 
 //get the account info and return null if there is nothing there
-router.get('login/:id', async (req, res) => {
+router.get('/login/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { data, error } = await supabase
       .from('accounts')
-      .select(
-        'id, google_account_id, first_name, last_name, email, phone_number, role, contact_preferences'
-      )
+      .select()
       .eq('id', id)
-      .single();
     if (error) {
       console.error('Error retrieving user data:', error);
       return res.sendStatus(500);
@@ -40,111 +37,116 @@ router.get('login/:id', async (req, res) => {
 //create the driver account, and the car associated with that account in the database.
 //will probably refactor to be a supabase transaction for atomicity, so that if one fails, the other will fail as well. so we dont have to deal with a partially constructed record in the database.
 router.post('/login/:id/driver', async (req, res) => {
-  const {id} = req.params;
+  const { id } = req.params;
   const { google_accounts_id, first_name, last_name, email, phone_number, role, make, model, color, license_plate_number } = req.body;
   try {
     const { error: accountsError } = await supabase
       .from('accounts')
       .insert(
         {
-        id,
-        google_accounts_id,
-        first_name,
-        last_name,
-        email,
-        phone_number,
-        role
-      }
-    );
-if (accountsError) {
-  console.error('Error creating driver account:', error);
-  res.sendStatus(500);
-}
-const { error carsError } = await supabase
-  .from('cars')
-  .insert(
-    {
-        make,
-        model,
-        color,
-        license_plate_number,
-        user_id: id
-      }
-    );
-if (carsError) {
-  console.error('Error creating driver account (cars):', error);
-  res.sendStatus(500);
-}
+          id,
+          first_name,
+          last_name,
+          email,
+          phone_number,
+          role
+        }
+      );
+    if (accountsError) {
+      console.error('Error creating driver account:', accountsError);
+      return res.sendStatus(500);
+    }
+    const { error: carsError } = await supabase
+      .from('cars')
+      .insert(
+        {
+          make,
+          model,
+          color,
+          license_plate_number,
+          user_id: id
+        }
+      );
+    if (carsError) {
+      console.error('Error creating driver account (cars):', carsError);
+      return res.sendStatus(500);
+    }
+    res.sendStatus(201);
   }
   catch (error) {
-  console.error('Error creating account:', error);
-  res.status(500).json({ error: 'Internal server error' });
-}
+    console.error('Error creating account:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+
 });
 //need to set up a post request to create a new valet account with the google id token and the user information that is input on the front end. this also assumes that a middleware function is used that generates the lat and lng from the passed in address. then creates the garage and the parking spots associated with that garage.
 router.post('/login/:id/valet', geocodeMiddleware, async (req, res) => {
-  const {id} = req.params;
-  const { google_accounts_id, first_name, last_name, email, phone_number, role, address, city, state, zip, country, name, operation_hours, spots, lat, lng} = req.body;
+  const { id } = req.params;
+  const { google_accounts_id, first_name, last_name, email, phone_number, role, address, city, state, zip, country, name, operation_hours, spots, lat, lng } = req.body;
 
   try {
     const { error: accountsError } = await supabase
       .from('accounts')
       .insert(
         {
-        id,
-        google_accounts_id,
-        first_name,
-        last_name,
-        email,
-        phone_number,
-        role
-      }
-    );
-if (accountsError) {
-  console.error('Error creating valet account:', error);
-  res.sendStatus(500);
-}
-const { error: garagesError, data: garageData } = await supabase
-  .from('garages')
-  .insert(
-    {
-        address,
-        city,
-        state,
-        zip,
-        country,
-        name,
-        operation_hours,
-        spots,
-        user_id: id,
-        lat,
-        lng
-      }
-    )
-    .select();
-if (garagesError) {
-  console.error('Error creating valet account (garage):', error);
-  res.sendStatus(500);
-}
-const rows = Array.from({ length: spots }, () => (
-  {
-    garage_id: garageData.id
-  }
-const { error: spotsError } = await supabase
-  .from('parking_spots')
-  .insert(rows);
-if (spotsError) {
-  console.error('Error creating valet account (spots):', error);
-  res.sendStatus(500);
-}
-));
+          id,
+          first_name,
+          last_name,
+          email,
+          phone_number,
+          role
+        }
+      );
+
+    if (accountsError) {
+      console.error('Error creating valet account:', accountsError);
+      return res.sendStatus(500);
+    }
+    const { error: garagesError, data: garageData } = await supabase
+      .from('garages')
+      .insert(
+        {
+          address,
+          city,
+          state,
+          zip,
+          country,
+          name,
+          operation_hours,
+          spots,
+          user_id: id,
+          lat,
+          lng
+        }
+      )
+      .select();
+
+    if (garagesError) {
+      console.error('Error creating valet account (garage):', garagesError);
+      return res.sendStatus(500);
+    }
+
+    const rows = Array.from({ length: spots }, () => (
+      {
+        garage_id: garageData.id
+      }));
+
+    const { error: spotsError } = await supabase
+      .from('parking_spots')
+      .insert(rows);
+
+    if (spotsError) {
+      console.error('Error creating valet account (spots):', spotsError);
+      res.sendStatus(500);
+    }
+    res.sendStatus(201);
   } catch (error) {
-  console.error('Error creating account:', error);
-  res.status(500).json({ error: 'Internal server error' });
-}
+    console.error('Error creating account:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
-router.get('/login/test', async (req, res) => {
+router.get('/login/test/test', async (req, res) => {
   try {
     const { data, error } = await accountInfo.select('*');
     //another valid way to query the data from this table would be to use the following:

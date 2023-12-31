@@ -32,13 +32,15 @@ const geocodeMiddleware = (req, res, next) => {
   createGeocode(address)
     .then(coord => {
       //add the lat and lng properties to the req.body object
-      req.body.lat = coord.lat;
-      req.body.lng = coord.lng;
+      const parsedCoord = JSON.parse(coord);
+      req.body.lat = parsedCoord.lat;
+      req.body.lng = parsedCoord.lng;
       next();
     })
     .catch(err => {
+      console.error('Error creating geocode:', err);
       res.sendStatus(500);
-    })
+    });
 };
 
 module.exports = geocodeMiddleware;
