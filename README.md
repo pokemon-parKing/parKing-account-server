@@ -51,13 +51,14 @@ Instructions to setup the API on your local machine below.
 ![NPM](https://img.shields.io/badge/NPM-%23000000.svg?style=for-the-badge&logo=npm&logoColor=white)
 
 ```sh
-npm install npm@latest -g 
+npm install npm@latest -g
 ```
 ### Required Environment Variables
 ```sh
 PORT=(host port)
 Superbase_URL=(db uri)
 Superbase_API_KEY=(our db api key)
+GOOGLE_API=(our google api key)
 ```
 
 ### Installation
@@ -73,11 +74,16 @@ Superbase_API_KEY=(our db api key)
    ```
 1. Enter your ENV varaibles into a `.env` file
    ```
-   See above for required variables
+   See above for required variables or
+   copy example.env and fill in
    ```
-1. Start the Server
+1. Start the Accounts Server
    ```sh
    npm run start
+   ```
+1. Start the Login Server
+   ```sh
+   npm run login-server-dev
    ```
 
 
@@ -87,116 +93,116 @@ Superbase_API_KEY=(our db api key)
 <details>
   <summary>/valet/:id [GET]</summary>
   <p></p>
-  <div>Request:<div> 
+  <div>Request:<div>
 
     query must contain a valid garage_id
 
   <p></p>
   <div>Response:</div>
-  
+
     Garage information: { id, address, city, state, zip, country, name, operation_hours, spots, user_id, lat, lng }
-  
+
 </details>
 
 <details>
   <summary>/valet/:id/operation-hours [PUT]</summary>
   <p></p>
-  <div>Request:<div> 
+  <div>Request:<div>
 
     query must contain a valid garage_id
     body: { operation_hours }
-    
+
   <p></p>
   <div>Response:</div>
-  
+
     status code of 200 with a message "Operation hours updated successfully"
-  
+
 </details>
 
 <details>
   <summary>/valet/:id/spots [PUT]</summary>
   <p></p>
-  <div>Request:<div> 
-    
+  <div>Request:<div>
+
     query must contain a valid garage_id
     body: { spots }
-    
+
   <p></p>
   <div>Response:</div>
-  
+
     { garageId, spotIds || removedSpotsIds } reponse contains confirmed changes to the garage spots
-  
+
 </details>
 
 <details>
   <summary>/user/:id [GET]</summary>
   <p></p>
-  <div>Request:<div> 
-    
+  <div>Request:<div>
+
     query must contain a valid user_id
-    
+
   <p></p>
   <div>Response:</div>
-  
+
     Account information: { id, google_account_id, first_name, last_name, email, phone_number, role, contact_preferences }
-  
+
 </details>
 
 <details>
   <summary>/user/:id [PUT]</summary>
   <p></p>
-  <div>Request:<div> 
-  
+  <div>Request:<div>
+
     body: { first_name, last_name, email, phone_number }
-    
+
   <p></p>
   <div>Response:</div>
-  
+
     { id, first_name, last_name, google_account_id, email, phone_number, role, contact_preferences } response contains confirmed information for user account data
-  
+
 </details>
 
 <details>
   <summary>/user/:id/cars [GET]</summary>
   <p></p>
-  <div>Request:<div> 
-    
+  <div>Request:<div>
+
     query must contain a valid user_id
-    
+
   <p></p>
   <div>Response:</div>
-  
+
     [{ car information }]  reponse will be an array of all car objects associated with the user
-  
+
 </details>
 
 <details>
   <summary>/user/:id/add-vehicle [POST]</summary>
   <p></p>
-  <div>Request:<div> 
-    
+  <div>Request:<div>
+
     query must contain a valid user_id
     body: { make, model, color, license_plate_number }
-    
+
   <p></p>
   <div>Response:</div>
-  
+
     status code of 201
-  
+
 </details>
 
 <details>
   <summary>/user/:id/edit-vehicle [PUT]</summary>
   <p></p>
-  <div>Request:<div> 
-    
+  <div>Request:<div>
+
     body: { id, make, model, color, license_plate_number }
-    
+
   <p></p>
   <div>Response:</div>
-  
+
     status code of 200
-  
+
 </details>
 
 
@@ -204,15 +210,93 @@ Superbase_API_KEY=(our db api key)
 <details>
   <summary>/user/:id/delete-vehicle [DELETE]</summary>
   <p></p>
-  <div>Request:<div> 
-    
-    body: { vehicleId } 
-    
+  <div>Request:<div>
+
+    body: { vehicleId }
+
   <p></p>
   <div>Response:</div>
-  
+
     status code of 200
-  
+
+</details>
+
+<details>
+  <summary>/login/:id/driver [POST]</summary>
+  <p></p>
+  <div>Params:<div>
+
+    :id =  user_id
+
+  <p></p>
+  <div>Request:<div>
+
+    body: {
+    first_name,
+    last_name,
+    email,
+    phone_number, (of the form "(XXX)-XXX-XXXX")
+    role, (for driver needs to be "user")
+    make,
+    model,
+    color,
+    license_plate_number
+    }
+
+  <p></p>
+  <div>Response:</div>
+
+    status code of 201
+
+</details>
+
+<details>
+  <summary>/login/:id/valet [POST]</summary>
+  <p></p>
+  <div>Params:<div>
+
+    :id =  user_id
+
+  <p></p>
+  <div>Request:<div>
+
+    body: {
+    first_name,
+    last_name,
+    email,
+    phone_number, (of the form "(XXX)-XXX-XXXX")
+    role, (for valet needs to be "admin")
+    address,
+    city,
+    state,
+    zip,
+    country,
+    name,
+    operation_hours, (of the form "XX-XX" where X is a numerical digit)
+    spots (where spots is an integer)
+    }
+
+  <p></p>
+  <div>Response:</div>
+
+    status code of 201
+
+</details>
+
+<details>
+  <summary>/login/:id [GET]</summary>
+  <p></p>
+  <div>Params:<div>
+
+    :id =  user_id
+
+  <p></p>
+
+  <div>Response:</div>
+
+    [object] if the account exists or
+    [] if the account does not exist
+
 </details>
 
 
