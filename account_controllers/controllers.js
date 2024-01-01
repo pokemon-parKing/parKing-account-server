@@ -451,9 +451,11 @@ module.exports = {
 
           res.status(200).json({ garageId, removedSpotIds: spotsToRemove });
         } else {
-          await supabase.from('garages').update({ spots }).eq('id', garageId);
-
-          res.status(200).json({ garageId, spotIds: availableSpotIds });
+          res.status(200).json({
+            message:
+              'No changes needed. Requested spots are the same as current spots.',
+            garageId,
+          });
         }
       } catch (error) {
         console.error('Error updating garage parking spots:', error);
