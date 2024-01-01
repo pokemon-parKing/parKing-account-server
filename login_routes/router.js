@@ -117,7 +117,6 @@ router.post('/login/:id/valet', geocodeMiddleware, async (req, res) => {
         }
       )
       .select();
-      console.log('garageData:', garageData);
 
     if (garagesError) {
       console.error('Error creating valet account (garage):', garagesError);
@@ -128,7 +127,6 @@ router.post('/login/:id/valet', geocodeMiddleware, async (req, res) => {
       {
         garage_id: garageData[0].id
       }));
-    console.log('rows:', rows);
 
     const { error: spotsError } = await supabase
       .from('parking_spots')
