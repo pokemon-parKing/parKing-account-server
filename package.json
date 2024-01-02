@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/pokemon-parKing/parKing-account-server#readme",
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.3.42",
     "@supabase/supabase-js": "^2.39.1",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
