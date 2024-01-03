@@ -2,21 +2,152 @@ const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
 const router = express.Router();
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const geocodeMiddleware = require('../middleware/geocodeGrabber');
 
-const accountInfo = supabase.from('accounts');
-const authUsers = supabase.from('auth.users');
+const supabase = createClient(process.env.Superbase_URL, process.env.Superbase_API_Key);
 
-//this is just my test route setup from before so that I can test the server is running and I can query the database
-//these are the routes that i think i will need to set up.
-//need to set up a login get request to see if a google id token exists on the database,
-//need another request to log in a user with a google id token if it exists on the database
-//need to set up a post request to create a new driver account with the google id token and the user information that is input on the front end
-//need to set up a post request to create a new valet account with the google id token and the user information that is input on the front end (might combine these requests into one for more dry code)
+//these are the routes that i will need to set up.
+//driver/valet account creation, get account info
 
-router.get('/login/test', async (req, res) => {
+//get the account info and return null if there is nothing there
+router.get('/login/:id', async (req, res) => {
   try {
-    const { data, error } = await accountInfo.select('*');
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('accounts')
+      .select()
+      .eq('id', id);
+    if (error) {
+      console.error('Error retrieving user data:', error);
+      return res.sendStatus(500);
+    }
+    if (!data) {
+      return res.status(201).send(null);
+    }
+    res.status(200).json(data);
+  } catch (error) {
+    console.error('Error retrieving user data:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+//create the driver account, and the car associated with that account in the database.
+//will probably refactor to be a supabase transaction for atomicity, so that if one fails, the other will fail as well. so we dont have to deal with a partially constructed record in the database.
+router.post('/login/:id/driver', async (req, res) => {
+  const { id } = req.params;
+  const { google_accounts_id, first_name, last_name, email, phone_number, role, make, model, color, license_plate_number } = req.body;
+  try {
+    const { error: accountsError } = await supabase
+      .from('accounts')
+      .insert(
+        {
+          id,
+          first_name,
+          last_name,
+          email,
+          phone_number,
+          role
+        }
+      );
+    if (accountsError) {
+      console.error('Error creating driver account:', accountsError);
+      return res.sendStatus(500);
+    }
+    const { error: carsError } = await supabase
+      .from('cars')
+      .insert(
+        {
+          make,
+          model,
+          color,
+          license_plate_number,
+          user_id: id
+        }
+      );
+    if (carsError) {
+      console.error('Error creating driver account (cars):', carsError);
+      return res.sendStatus(500);
+    }
+    res.sendStatus(201);
+  }
+  catch (error) {
+    console.error('Error creating account:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+
+});
+//need to set up a post request to create a new valet account with the google id token and the user information that is input on the front end. this also assumes that a middleware function is used that generates the lat and lng from the passed in address. then creates the garage and the parking spots associated with that garage.
+router.post('/login/:id/valet', geocodeMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { google_accounts_id, first_name, last_name, email, phone_number, role, address, city, state, zip, country, name, operation_hours, spots, lat, lng } = req.body;
+
+  try {
+    const { error: accountsError } = await supabase
+      .from('accounts')
+      .insert(
+        {
+          id,
+          first_name,
+          last_name,
+          email,
+          phone_number,
+          role
+        }
+      );
+
+    if (accountsError) {
+      console.error('Error creating valet account:', accountsError);
+      return res.sendStatus(500);
+    }
+    const { error: garagesError, data: garageData } = await supabase
+      .from('garages')
+      .insert(
+        {
+          address,
+          city,
+          state,
+          zip,
+          country,
+          name,
+          operation_hours,
+          spots,
+          user_id: id,
+          lat,
+          lng
+        }
+      )
+      .select();
+
+    if (garagesError) {
+      console.error('Error creating valet account (garage):', garagesError);
+      return res.sendStatus(500);
+    }
+
+    const rows = Array.from({ length: spots }, () => (
+      {
+        garage_id: garageData[0].id
+      }));
+
+    const { error: spotsError } = await supabase
+      .from('parking_spots')
+      .insert(rows);
+
+    if (spotsError) {
+      console.error('Error creating valet account (spots):', spotsError);
+      res.sendStatus(500);
+    }
+    res.sendStatus(201);
+  } catch (error) {
+    console.error('Error creating account:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/login/test/test', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+    .from('accounts')
+    .select('*');
     //another valid way to query the data from this table would be to use the following:
     // const { data, error } = await supabase.from('accounts').select('*');
 
