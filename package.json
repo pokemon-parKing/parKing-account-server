@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon account_server/index.js",
-    "login-server-dev": "nodemon login_server/index.js"
+    "login-server-dev": "nodemon login_server/index.js",
+    "server-dev": "nodemon index.js"
   },
   "repository": {
     "type": "git",
