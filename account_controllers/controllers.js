@@ -336,20 +336,9 @@ module.exports = {
         const { id } = req.params;
         const { spots } = req.body;
 
-        const { error: garageError } = await supabase
-          .from('garages')
-          .update({ spots })
-          .eq('user_id', id)
-          .single();
-
-        if (garageError) {
-          console.error('Error updating garage parking spots:', garageError);
-          return res.sendStatus(500);
-        }
-
         const { data: garageData, error: garageDataError } = await supabase
           .from('garages')
-          .select('id')
+          .select('id, spots')
           .eq('user_id', id)
           .single();
 
@@ -359,6 +348,32 @@ module.exports = {
         }
 
         const garageId = garageData.id;
+        const formattedNext7Days = [...Array(7)].map((_, index) =>
+          DateTime.local()
+            .startOf('day')
+            .plus({ days: index })
+            .toFormat('MM-dd-yy')
+        );
+
+        const { data: conflictingReservations, error: reservationError } =
+          await supabase
+            .from('reservations')
+            .select('parking_spot_id')
+            .eq('garage_id', garageId)
+            .in('status', ['reserved', 'checked-in'])
+            .in('date', formattedNext7Days);
+
+        if (reservationError) {
+          console.error(
+            'Error retrieving conflicting reservations:',
+            reservationError
+          );
+          return res.sendStatus(500);
+        }
+
+        const conflictingSpotIds = conflictingReservations.map(
+          (reservation) => reservation.parking_spot_id
+        );
 
         const { data: existingSpots, error: existingSpotsError } =
           await supabase
@@ -375,48 +390,72 @@ module.exports = {
         }
 
         const existingSpotIds = existingSpots.map((spot) => spot.id);
-
+        const availableSpotIds = existingSpotIds.filter(
+          (spotId) => !conflictingSpotIds.includes(spotId)
+        );
         const numSpotsToAdd = spots - existingSpotIds.length;
 
         if (numSpotsToAdd > 0) {
           const newSpotIds = await Promise.all(
             Array.from({ length: numSpotsToAdd }, async () => {
-              const { error: newSpotError } = await supabase
-                .from('parking_spots')
-                .insert({
-                  garage_id: garageId,
-                })
-                .single();
+              try {
+                const { data: newSpotData, error: newSpotError } =
+                  await supabase
+                    .from('parking_spots')
+                    .insert({
+                      garage_id: garageId,
+                    })
+                    .select();
 
-              if (newSpotError) {
-                console.error('Error adding new parking spot:', newSpotError);
+                if (newSpotError) {
+                  console.error('Error adding new parking spot:', newSpotError);
+                  return null;
+                }
+
+                if (!newSpotData) {
+                  console.error(
+                    'Unexpected response from Supabase:',
+                    newSpotData
+                  );
+                  return null;
+                }
+
+                return newSpotData.id;
+              } catch (insertError) {
+                console.error('Error during insertion:', insertError);
                 return null;
               }
             })
           );
 
           const filteredNewSpotIds = newSpotIds.filter(
-            (spotsId) => spotsId !== null
+            (filteredid) => filteredid !== null
           );
-          const allSpotIds = existingSpotIds.concat(filteredNewSpotIds);
+          const allSpotIds = availableSpotIds.concat(filteredNewSpotIds);
+
+          await supabase.from('garages').update({ spots }).eq('id', garageId);
 
           res.status(200).json({ garageId, spotIds: allSpotIds });
         } else if (numSpotsToAdd < 0) {
-          const spotsToRemove = existingSpotIds.slice(0, -numSpotsToAdd);
+          const spotsToRemove = availableSpotIds.slice(numSpotsToAdd);
 
-          const { error: removeSpotsError } = await supabase
-            .from('parking_spots')
-            .delete()
-            .in('id', spotsToRemove);
-
-          if (removeSpotsError) {
-            console.error('Error removing parking spots:', removeSpotsError);
-            return res.sendStatus(500);
+          if (availableSpotIds.length < Math.abs(numSpotsToAdd)) {
+            return res.status(400).json({
+              error: 'Cannot remove spots due to conflicting reservations.',
+            });
           }
+
+          await supabase.from('parking_spots').delete().in('id', spotsToRemove);
+
+          await supabase.from('garages').update({ spots }).eq('id', garageId);
 
           res.status(200).json({ garageId, removedSpotIds: spotsToRemove });
         } else {
-          res.status(200).json({ garageId, spotIds: existingSpotIds });
+          res.status(200).json({
+            message:
+              'No changes needed. Requested spots are the same as current spots.',
+            garageId,
+          });
         }
       } catch (error) {
         console.error('Error updating garage parking spots:', error);
