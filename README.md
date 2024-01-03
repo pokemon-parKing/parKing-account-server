@@ -85,6 +85,10 @@ GOOGLE_API=(our google api key)
    ```sh
    npm run login-server-dev
    ```
+1. Start the Consolidated Server
+   ```sh
+   npm run server-dev
+   ```
 
 
 
