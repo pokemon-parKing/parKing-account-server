@@ -1,3 +1,4 @@
+require('dotenv').config()
 const { Client } = require('@googlemaps/google-maps-services-js');
 
 const google = new Client({});
@@ -8,18 +9,19 @@ const createGeocode = (address) => {
   return new Promise((resolve, reject) => {
     const query = {
       params: {
-        key: process.env.GOOGLE_KEY,
-        address,
-      },
-    };
-    google.geocode(query).then((results) => {
-      if (results.data.status !== 'OK') {
-        return reject('No results');
+        key: process.env.GOOGLE_API,
+        address
       }
-      const coord = JSON.stringify(results.data.results[0].geometry.location);
-      return resolve(coord);
-    });
-  });
+    };
+    google.geocode(query)
+      .then(results => {
+        if (results.data.status !== 'OK') {
+          return reject('No results');
+        }
+        const coord = JSON.stringify(results.data.results[0].geometry.location);
+        return resolve(coord);
+      })
+  })
 };
 
 const geocodeMiddleware = (req, res, next) => {
@@ -43,7 +45,7 @@ const geocodeMiddleware = (req, res, next) => {
       next();
     })
     .catch((err) => {
-      console.error('Error creating geocode:', err);
+      // console.error('Error creating geocode:', err);
       res.sendStatus(500);
     });
 };
