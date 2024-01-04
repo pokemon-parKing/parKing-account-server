@@ -4,7 +4,7 @@ const router = express.Router();
 
 const geocodeMiddleware = require('../middleware/geocodeGrabber');
 
-const supabase = createClient(process.env.Superbase_URL, process.env.Superbase_API_Key);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 //these are the routes that i will need to set up.
 //driver/valet account creation, get account info
