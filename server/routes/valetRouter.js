@@ -1,6 +1,5 @@
 const valetRouter = require('express').Router();
-const controllers = require('../account_controllers/controllers');
-require('dotenv').config();
+const controllers = require('../controllers/accountController');
 
 valetRouter.route('/valet/:id').get(controllers.valetInfo.getValetData);
 valetRouter
