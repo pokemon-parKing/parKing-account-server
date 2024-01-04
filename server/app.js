@@ -1,15 +1,18 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const router = require('../account_routes/router');
-const valetRouter = require('../valet_routes/router');
+const accountRouter = require('./routes/accountRouter');
+const valetRouter = require('./routes/valetRouter');
+const loginRouter = require('./routes/loginRouter');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3003;
 
 app.use(cors());
 app.use(express.json());
-app.use('/', router);
+app.use('/', accountRouter);
 app.use('/', valetRouter);
+app.use('/', loginRouter);
 
 app.listen(port, (err) => {
   if (err) {

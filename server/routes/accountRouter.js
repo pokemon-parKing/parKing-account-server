@@ -1,6 +1,5 @@
 const router = require('express').Router();
-const controllers = require('../account_controllers/controllers');
-require('dotenv').config();
+const controllers = require('../controllers/accountController');
 
 router
   .route('/user/:id')
