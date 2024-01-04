@@ -1,13 +1,7 @@
 /* eslint-disable consistent-return */
 /* eslint-disable camelcase */
-require('dotenv').config();
-const { createClient } = require('@supabase/supabase-js');
 const { DateTime } = require('luxon');
-
-const supabase = createClient(
-  process.env.Supabase_URL,
-  process.env.Supabase_API_Key
-);
+const supabase = require('../db');
 
 const formatDate = (inputDate) => {
   const [month, day, year] = inputDate.toLocaleDateString().split('/');
