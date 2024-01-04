@@ -8,7 +8,7 @@ const geocodeMiddleware = require('../middleware/geocodeGrabber');
 //driver/valet account creation, get account info
 
 //get the account info and return null if there is nothing there
-router.get('/login/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { data, error } = await supabase
@@ -31,7 +31,7 @@ router.get('/login/:id', async (req, res) => {
 
 //create the driver account, and the car associated with that account in the database.
 //will probably refactor to be a supabase transaction for atomicity, so that if one fails, the other will fail as well. so we dont have to deal with a partially constructed record in the database.
-router.post('/login/:id/driver', async (req, res) => {
+router.post('/:id/driver', async (req, res) => {
   const { id } = req.params;
   const {
     google_accounts_id,
@@ -76,7 +76,7 @@ router.post('/login/:id/driver', async (req, res) => {
   }
 });
 //need to set up a post request to create a new valet account with the google id token and the user information that is input on the front end. this also assumes that a middleware function is used that generates the lat and lng from the passed in address. then creates the garage and the parking spots associated with that garage.
-router.post('/login/:id/valet', geocodeMiddleware, async (req, res) => {
+router.post('/:id/valet', geocodeMiddleware, async (req, res) => {
   const { id } = req.params;
   const {
     google_accounts_id,
@@ -108,7 +108,7 @@ router.post('/login/:id/valet', geocodeMiddleware, async (req, res) => {
     });
 
     if (accountsError) {
-      console.error('Error creating valet account:', accountsError);
+      // console.error('Error creating valet account:', accountsError);
       return res.sendStatus(500);
     }
     const { error: garagesError, data: garageData } = await supabase
@@ -129,7 +129,7 @@ router.post('/login/:id/valet', geocodeMiddleware, async (req, res) => {
       .select();
 
     if (garagesError) {
-      console.error('Error creating valet account (garage):', garagesError);
+      // console.error('Error creating valet account (garage):', garagesError);
       return res.sendStatus(500);
     }
 
@@ -152,7 +152,7 @@ router.post('/login/:id/valet', geocodeMiddleware, async (req, res) => {
   }
 });
 
-router.get('/login/test/test', async (req, res) => {
+router.get('/test/test', async (req, res) => {
   try {
     const { data, error } = await supabase.from('accounts').select('*');
     //another valid way to query the data from this table would be to use the following:
