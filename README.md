@@ -55,9 +55,9 @@ npm install npm@latest -g
 ```
 ### Required Environment Variables
 ```sh
+SUPABASE_URL=(db uri)
+SUPABASE_KEY=(our db api key)
 PORT=(host port)
-Superbase_URL=(db uri)
-Superbase_API_KEY=(our db api key)
 GOOGLE_API=(our google api key)
 ```
 
@@ -77,17 +77,9 @@ GOOGLE_API=(our google api key)
    See above for required variables or
    copy example.env and fill in
    ```
-1. Start the Accounts Server
+1. Start the Accounts and Login Server
    ```sh
    npm run start
-   ```
-1. Start the Login Server
-   ```sh
-   npm run login-server-dev
-   ```
-1. Start the Consolidated Server
-   ```sh
-   npm run server-dev
    ```
 
 
