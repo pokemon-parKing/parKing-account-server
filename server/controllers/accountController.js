@@ -180,7 +180,7 @@ module.exports = {
         }
 
         if (!data || data.length === 0) {
-          return res.status(404).send('No reservations found for today');
+          return res.status(204).send('No reservations found for today');
         }
 
         res.status(200).json(data);
