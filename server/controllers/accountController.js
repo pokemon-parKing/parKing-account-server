@@ -1,5 +1,3 @@
-/* eslint-disable consistent-return */
-/* eslint-disable camelcase */
 const { DateTime } = require('luxon');
 const supabase = require('../db');
 
@@ -95,7 +93,7 @@ module.exports = {
           console.error('Error deleting vehicle:', error);
           return res.sendStatus(500);
         }
-        res.status(200).send('Vehicle deleted successfully');
+        res.status(200).send('Successfully deleted vehicle');
       } catch (error) {
         console.error('Error deleting vehicle:', error);
         res.status(500).send('Internal Server Error');
