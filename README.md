@@ -183,7 +183,7 @@ GOOGLE_API=(our google api key)
   <p></p>
   <div>Response:</div>
 
-    status code of 201
+    status code of 201 with a message of "Successfully added vehicle"
 
 </details>
 
@@ -197,7 +197,7 @@ GOOGLE_API=(our google api key)
   <p></p>
   <div>Response:</div>
 
-    status code of 200
+    status code of 200 with a message of "Successfully edited vehicle"
 
 </details>
 
@@ -213,7 +213,7 @@ GOOGLE_API=(our google api key)
   <p></p>
   <div>Response:</div>
 
-    status code of 200
+    status code of 200 with a message of "Successfully deleted vehicle"
 
 </details>
 
