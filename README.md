@@ -218,6 +218,20 @@ GOOGLE_API=(our google api key)
 </details>
 
 <details>
+  <summary>/user/:id/current-reservations [GET]</summary>
+  <p></p>
+  <div>Request:<div>
+
+    query must contain a valid user_id
+
+  <p></p>
+  <div>Response:</div>
+
+     [{ reservation information }]  reponse will be an array of all reservation objects associated with the user
+
+</details>
+
+<details>
   <summary>/login/:id/driver [POST]</summary>
   <p></p>
   <div>Params:<div>
