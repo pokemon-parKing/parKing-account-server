@@ -156,36 +156,48 @@ module.exports = {
         const { id } = req.params;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-
         const formattedToday = formatDate(today);
-
-        const { data, error } = await supabase
-          .from('reservations')
-          .select(
+        const { data: reservationsData, error: reservationsError } =
+          await supabase
+            .from('reservations')
+            .select(
+              `
+              id,
+              parking_spot_id,
+              date,
+              time,
+              status,
+              garages (name, address, city, state, country, zip),
+              cars (make, model, color, license_plate_number)
             `
-            id,
-            parking_spot_id,
-            date,
-            time,
-            garages (name, address, city, state, country, zip)
-          `
-          )
-          .eq('user_id', id)
-          .in('status', ['reserved', 'checked-in'])
-          .order('date', { ascending: true })
-          .order('time', { ascending: true })
-          .eq('date', formattedToday);
-
-        if (error) {
-          console.error('Error fetching reservations:', error);
+            )
+            .eq('user_id', id)
+            .in('status', ['reserved', 'checked-in'])
+            .order('date', { ascending: true })
+            .order('time', { ascending: true })
+            .eq('date', formattedToday);
+        if (reservationsError) {
+          console.error('Error fetching reservations:', reservationsError);
           return res.sendStatus(500);
         }
-
-        if (!data || data.length === 0) {
+        if (!reservationsData || reservationsData.length === 0) {
           return res.status(204).send('No reservations found for today');
         }
-
-        res.status(200).json(data);
+        const qrCodesPromises = reservationsData.map((reservation) =>
+          supabase.storage.from('qrcodes').getPublicUrl(`${reservation.id}.png`)
+        );
+        const qrCodes = await Promise.all(qrCodesPromises);
+        const combinedData = reservationsData.map((reservation, index) => ({
+          id: reservation.id,
+          parking_spot_id: reservation.parking_spot_id,
+          date: reservation.date,
+          time: reservation.time,
+          status: reservation.status,
+          garages: reservation.garages,
+          cars: reservation.cars,
+          qrCodeUrl: qrCodes[index].data,
+        }));
+        res.status(200).json(combinedData);
       } catch (error) {
         console.error('Error fetching reservations:', error);
         res.status(500).send('Internal Server Error');
