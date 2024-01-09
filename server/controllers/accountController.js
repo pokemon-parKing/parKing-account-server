@@ -1,3 +1,6 @@
+/* eslint-disable consistent-return */
+/* eslint-disable camelcase */
+const supabase = require('../db');
 const { DateTime } = require('luxon');
 
 const formatDate = (inputDate) => {
