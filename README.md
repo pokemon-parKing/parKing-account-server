@@ -312,9 +312,8 @@ GOOGLE_API=(our google api key)
 
 </details>
 
-
-
 # Database Schema
+<a id='database-schema'></a>
 ![Schema](https://github.com/pokemon-parKing/parKing-account-server/assets/144174704/eb5927b5-375e-4655-8a0e-568b06f626f5)
 
 
