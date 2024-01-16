@@ -3,8 +3,6 @@ const { Client } = require('@googlemaps/google-maps-services-js');
 
 const google = new Client({});
 
-// takes in an address in some form (string based is fine)
-//copied from the reservations server, I dont think it makes sense to query the reservations server when this code/api is relatively simple to implement
 const createGeocode = (address) => {
   return new Promise((resolve, reject) => {
     const query = {
@@ -25,8 +23,6 @@ const createGeocode = (address) => {
 };
 
 const geocodeMiddleware = (req, res, next) => {
-  //need to call the reservations server and add properties to the req.body object for the lat and lng based off of what is returned from the geocode api
-  //build the whole address url
   const address =
     req.body.address +
     ' ' +
