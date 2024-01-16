@@ -4,10 +4,6 @@ const router = express.Router();
 const supabase = require('../db');
 const geocodeMiddleware = require('../middleware/geocodeGrabber');
 
-//these are the routes that i will need to set up.
-//driver/valet account creation, get account info
-
-//get the account info and return null if there is nothing there
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -29,8 +25,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-//create the driver account, and the car associated with that account in the database.
-//will probably refactor to be a supabase transaction for atomicity, so that if one fails, the other will fail as well. so we dont have to deal with a partially constructed record in the database.
 router.post('/:id/driver', async (req, res) => {
   const { id } = req.params;
   const {
@@ -75,7 +69,7 @@ router.post('/:id/driver', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-//need to set up a post request to create a new valet account with the google id token and the user information that is input on the front end. this also assumes that a middleware function is used that generates the lat and lng from the passed in address. then creates the garage and the parking spots associated with that garage.
+
 router.post('/:id/valet', geocodeMiddleware, async (req, res) => {
   const { id } = req.params;
   const {
@@ -108,7 +102,6 @@ router.post('/:id/valet', geocodeMiddleware, async (req, res) => {
     });
 
     if (accountsError) {
-      // console.error('Error creating valet account:', accountsError);
       return res.sendStatus(500);
     }
     const { error: garagesError, data: garageData } = await supabase
@@ -129,7 +122,6 @@ router.post('/:id/valet', geocodeMiddleware, async (req, res) => {
       .select();
 
     if (garagesError) {
-      // console.error('Error creating valet account (garage):', garagesError);
       return res.sendStatus(500);
     }
 
@@ -148,28 +140,6 @@ router.post('/:id/valet', geocodeMiddleware, async (req, res) => {
     res.sendStatus(201);
   } catch (error) {
     console.error('Error creating account:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-router.get('/test/test', async (req, res) => {
-  try {
-    const { data, error } = await supabase.from('accounts').select('*');
-    //another valid way to query the data from this table would be to use the following:
-    // const { data, error } = await supabase.from('accounts').select('*');
-
-    //example of a join table query to get the accounts first and last names from the accounts table and the cars id from the cars table joined over accounts id and the cars user_id //apologies if im not phrasing that correctly, brain no worky
-    // const { data, error } = await supabase.from('cars').select('id, make, model, color, license_plate, accounts (firstName, lastName)')
-
-    //another way to do that a little more explicitly and maybe more 'readablly' would be to use the following:
-    // const { data, error } = await supabase.from('cars').select('id, make, model, color, license_plate, accounts!inner (firstName, lastName)');
-
-    if (error) {
-      throw error;
-    }
-    res.json(data);
-  } catch (error) {
-    console.error('Error retrieving account info:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
